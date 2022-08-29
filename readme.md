@@ -1,3 +1,14 @@
+# dreamfield-torch-colab (WIP)
+
+Aiming to make a colab friendly dreamfield-torch version.  
+**Since I am a coding beginner, no guarantee for the progress :)**
+
+## To do list:
+- [ ] Integrating Video generation.
+- [ ] Visualizing the training progress in colab.
+- [ ] Release the colab notebook.
+- [ ] Improve the generation quality.
+
 # dreamfields-torch (WIP)
 
 A pytorch implementation of [dreamfields](https://github.com/google-research/google-research/tree/master/dreamfields) as described in [Zero-Shot Text-Guided Object Generation with Dream Fields](https://arxiv.org/abs/2112.01455).
