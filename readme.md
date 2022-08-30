@@ -33,7 +33,10 @@ pip install -r requirements.txt
 # (optional) install the tcnn backbone
 pip install git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
 ```
-
+###  install customized verion of pymarchingcubes
+```bash
+bash scripts/install_PyMarchingCubes.sh
+```
 
 ### Build extension (optional)
 By default, we use [`load`](https://pytorch.org/docs/stable/cpp_extension.html#torch.utils.cpp_extension.load) to build the extension at runtime.
@@ -42,7 +45,6 @@ Therefore, we also provide the `setup.py` to build each extension:
 ```bash
 # install all extension modules
 bash scripts/install_ext.sh
-
 # if you want to install manually, here is an example:
 cd raymarching
 python setup.py build_ext --inplace # build ext only, do not install (only can be used in the parent directory)
