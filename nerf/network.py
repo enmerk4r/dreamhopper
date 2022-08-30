@@ -74,10 +74,11 @@ class NeRFNetwork(NeRFRenderer):
                 h = F.relu(h, inplace=True)
 
         sigma = F.softplus(h[..., 0])
+        color = torch.sigmoid(h[..., 1:])
 
         return {
             'sigma': sigma,
-            'color': color
+            'color': color,
         }
 
 

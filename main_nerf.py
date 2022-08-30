@@ -109,4 +109,7 @@ if __name__ == '__main__':
 
             # also test
             test_loader = NeRFDataset(opt, device=device, type='test', H=opt.H, W=opt.W, radius=opt.radius, fovy=opt.fovy, size=10).dataloader()
-            trainer.test(test_loader)
+            trainer.save_mesh(resolution=256, threshold=10)
+            trainer.test(test_loader, write_video=True) # test and save video
+            # trainer.test(test_loader)
+           

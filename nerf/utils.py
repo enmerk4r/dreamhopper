@@ -29,6 +29,7 @@ from torch.utils.data import Dataset, DataLoader
 
 import trimesh
 import marching_cubes as mcubes
+import imageio
 from rich.console import Console
 from torch_ema import ExponentialMovingAverage
 
@@ -619,7 +620,7 @@ class Trainer(object):
         self.evaluate_one_epoch(loader)
         self.use_tensorboardX = use_tensorboardX
 
-    def test(self, loader, save_path=None):
+    def test(self, loader, save_path=None, name=None, write_video=True):
 
         if save_path is None:
             save_path = os.path.join(self.workspace, 'results')
@@ -630,6 +631,11 @@ class Trainer(object):
 
         pbar = tqdm.tqdm(total=len(loader) * loader.batch_size, bar_format='{percentage:3.0f}% {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]')
         self.model.eval()
+
+        if write_video:
+            all_preds = []
+            all_preds_depth = []
+
         with torch.no_grad():
 
             # update grid
@@ -642,15 +648,29 @@ class Trainer(object):
                 with torch.cuda.amp.autocast(enabled=self.fp16):
                     preds, preds_depth = self.test_step(data)                
                 
-                path = os.path.join(save_path, f'{i:04d}.png')
-                path_depth = os.path.join(save_path, f'{i:04d}_depth.png')
+                # # if self.opt.color_space == 'linear':
+                # preds = linear_to_srgb(preds)
 
-                #self.log(f"[INFO] saving test image to {path}")
+                pred = preds[0].detach().cpu().numpy()
+                pred = (pred * 255).astype(np.uint8)
 
-                cv2.imwrite(path, cv2.cvtColor((preds[0].detach().cpu().numpy() * 255).astype(np.uint8), cv2.COLOR_RGB2BGR))
-                cv2.imwrite(path_depth, (preds_depth[0].detach().cpu().numpy()[0] * 255).astype(np.uint8))
+                pred_depth = preds_depth[0].detach().cpu().numpy()
+                pred_depth = (pred_depth * 255).astype(np.uint8)
+
+                if write_video:
+                    all_preds.append(pred)
+                    all_preds_depth.append(pred_depth)
+                # else:
+                    cv2.imwrite(os.path.join(save_path, f'{name}_{i:04d}_rgb.jpg'), cv2.cvtColor(pred, cv2.COLOR_RGB2BGR))
+                    cv2.imwrite(os.path.join(save_path, f'{name}_{i:04d}_depth.jpg'), pred_depth)
 
                 pbar.update(loader.batch_size)
+        
+        if write_video:
+            all_preds = np.stack(all_preds, axis=0)
+            all_preds_depth = np.stack(all_preds_depth, axis=0)
+            imageio.mimwrite(os.path.join(save_path, f'{name}_rgb.mp4'), all_preds, fps=25, quality=8, macro_block_size=1)
+            imageio.mimwrite(os.path.join(save_path, f'{name}_depth.mp4'), all_preds_depth, fps=25, quality=8, macro_block_size=1)
 
         self.log(f"==> Finished Test.")
     

@@ -7,3 +7,5 @@ tmp*
 data/
 trial*/
 .vs/
+PyMarchingCubes/
+trial/

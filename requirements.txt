@@ -8,9 +8,14 @@ numpy
 pandas
 tqdm
 matplotlib
-#PyMCubes
-#git+https://github.com/JustusThies/PyMarchingCubes.git
+# PyMCubes
+# git+https://github.com/JustusThies/PyMarchingCubes.git
 rich
 pysdf
 dearpygui
+packaging
+scipy
+lpips
+imageio
+imageio-ffmpeg
 git+https://github.com/openai/CLIP.git
