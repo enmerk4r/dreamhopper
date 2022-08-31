@@ -1,8 +1,10 @@
 import torch
 import argparse
+import random
 
 from nerf.provider import NeRFDataset
 from nerf.utils import *
+
 
 #torch.autograd.set_detect_anomaly(True)
 
@@ -12,7 +14,8 @@ if __name__ == '__main__':
     parser.add_argument('--text', default=None, help="text prompt")
     parser.add_argument('--image', default=None, help="ref image prompt")
     parser.add_argument('--workspace', type=str, default='workspace')
-    parser.add_argument('--seed', type=int, default=0)
+    parser.add_argument('--output_dir', type=str, default='./output')
+    parser.add_argument('--seed', type=int, default=-1,help="set to -1 to get random seed")
     ### training options
     parser.add_argument('--iters', type=int, default=30000, help="training iters")
     parser.add_argument('--lr', type=float, default=5e-4, help="initial learning rate")
@@ -59,7 +62,8 @@ if __name__ == '__main__':
         from nerf.network import NeRFNetwork
 
     print(opt)
-
+    if opt.seed == -1:
+        opt.seed = random.sample(range(0,np.iinfo(np.int32).max),1)[0]
     seed_everything(opt.seed)
 
     model = NeRFNetwork(

@@ -1,4 +1,5 @@
 import os
+# from pathlib import Path
 import glob
 import tqdm
 import math
@@ -254,6 +255,7 @@ class Trainer(object):
         self.scheduler_update_every_step = scheduler_update_every_step
         self.device = device if device is not None else torch.device(f'cuda:{local_rank}' if torch.cuda.is_available() else 'cpu')
         self.console = Console()
+        # self.output_dir = Path(self.opt.output_dir)
 
         model.to(self.device)
         if self.world_size > 1:
@@ -353,6 +355,10 @@ class Trainer(object):
 
         # workspace prepare
         self.log_ptr = None
+        # self.working_dir = (self.opt.output_dir + "/" + self.workspace +"/")
+        if self.opt.output_dir is not None:
+            os.makedirs(self.opt.output_dir, exist_ok=True)
+            os.chdir(self.opt.output_dir)
         if self.workspace is not None:
             os.makedirs(self.workspace, exist_ok=True)        
             self.log_path = os.path.join(workspace, f"log_{self.name}.txt")
@@ -361,7 +367,7 @@ class Trainer(object):
             self.ckpt_path = os.path.join(self.workspace, 'checkpoints')
             self.best_path = f"{self.ckpt_path}/{self.name}.pth.tar"
             os.makedirs(self.ckpt_path, exist_ok=True)
-            
+        self.log(f"[INFO] Training parameters:  {self.opt}")    
         self.log(f'[INFO] Trainer: {self.name} | {self.time_stamp} | {self.device} | {"fp16" if self.fp16 else "fp32"} | {self.workspace}')
         self.log(f'[INFO] #parameters: {sum([p.numel() for p in model.parameters() if p.requires_grad])}')
 
