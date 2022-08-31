@@ -11,7 +11,6 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--text', default=None, help="text prompt")
     parser.add_argument('--image', default=None, help="ref image prompt")
-    parser.add_argument('--test', action='store_true', help="test mode")
     parser.add_argument('--workspace', type=str, default='workspace')
     parser.add_argument('--seed', type=int, default=0)
     ### training options
@@ -23,8 +22,11 @@ if __name__ == '__main__':
     parser.add_argument('--num_steps', type=int, default=512, help="num steps sampled per ray (only valid when not using --cuda_ray)")
     parser.add_argument('--upsample_steps', type=int, default=0, help="num steps up-sampled per ray (only valid when not using --cuda_ray)")
     parser.add_argument('--max_ray_batch', type=int, default=4096, help="batch size of rays at inference to avoid OOM (only valid when not using --cuda_ray)")
-
-    ### network backbone options
+     ### test options
+    parser.add_argument('--test', action='store_true', help="test mode")
+    parser.add_argument('--save_video', action='store_true', help="save video in testing")
+    parser.add_argument('--test_samples', type=int, default=10, help="set the total frames of video output")
+    ## network backbone options
     parser.add_argument('--fp16', action='store_true', help="use amp mixed precision training")
     parser.add_argument('--cc', action='store_true', help="use TensoRF")
     ### dataset options
@@ -79,9 +81,9 @@ if __name__ == '__main__':
             gui.render()
         
         else:
-            test_loader = NeRFDataset(opt, device=device, type='test', H=opt.H, W=opt.W, radius=opt.radius, fovy=opt.fovy, size=10).dataloader()
+            test_loader = NeRFDataset(opt, device=device, type='test', H=opt.H, W=opt.W, radius=opt.radius, fovy=opt.fovy, size=opt.test_samples).dataloader()
             trainer.save_mesh(resolution=256, threshold=10)
-            trainer.test(test_loader, write_video=True) # test and save video
+            trainer.test(test_loader, write_video=opt.save_video) # test and save video
     
     else:
 
@@ -108,8 +110,6 @@ if __name__ == '__main__':
             trainer.train(train_loader, valid_loader, max_epoch)
 
             # also test
-            test_loader = NeRFDataset(opt, device=device, type='test', H=opt.H, W=opt.W, radius=opt.radius, fovy=opt.fovy, size=10).dataloader()
+            test_loader = NeRFDataset(opt, device=device, type='test', H=opt.H, W=opt.W, radius=opt.radius, fovy=opt.fovy, size=opt.test_samples).dataloader()
             trainer.save_mesh(resolution=256, threshold=10)
-            trainer.test(test_loader, write_video=True) # test and save video
-            # trainer.test(test_loader)
-           
+            trainer.test(test_loader, write_video=opt.save_video) # test and save video

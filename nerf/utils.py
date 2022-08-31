@@ -678,23 +678,22 @@ class Trainer(object):
                 pred = preds[0].detach().cpu().numpy()
                 pred = (pred * 255).astype(np.uint8)
 
-                pred_depth = preds_depth[0].detach().cpu().numpy()
+                pred_depth = preds_depth[0].detach().cpu().numpy()[0]
                 pred_depth = (pred_depth * 255).astype(np.uint8)
 
                 if write_video:
                     all_preds.append(pred)
                     all_preds_depth.append(pred_depth)
                 # else:
-                    cv2.imwrite(os.path.join(save_path, f'{name}_{i:04d}_rgb.jpg'), cv2.cvtColor(pred, cv2.COLOR_RGB2BGR))
-                    cv2.imwrite(os.path.join(save_path, f'{name}_{i:04d}_depth.jpg'), pred_depth)
-
+                    cv2.imwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_{i:04d}_rgb.jpg'), cv2.cvtColor(pred, cv2.COLOR_RGB2BGR))
+                    cv2.imwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_{i:04d}_depth.jpg'), pred_depth)
                 pbar.update(loader.batch_size)
-        
+
         if write_video:
             all_preds = np.stack(all_preds, axis=0)
             all_preds_depth = np.stack(all_preds_depth, axis=0)
-            imageio.mimwrite(os.path.join(save_path, f'{name}_rgb.mp4'), all_preds, fps=25, quality=8, macro_block_size=1)
-            imageio.mimwrite(os.path.join(save_path, f'{name}_depth.mp4'), all_preds_depth, fps=25, quality=8, macro_block_size=1)
+            imageio.mimwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_rgb.mp4'), all_preds, fps=25, quality=8, macro_block_size=1)
+            imageio.mimwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_depth.mp4'), all_preds_depth, fps=25, quality=8, macro_block_size=1)
 
         self.log(f"==> Finished Test.")
     
