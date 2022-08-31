@@ -29,6 +29,7 @@ from torch.utils.data import Dataset, DataLoader
 
 import trimesh
 import marching_cubes as mcubes
+import pymeshlab
 import imageio
 from rich.console import Console
 from torch_ema import ExponentialMovingAverage
@@ -585,9 +586,32 @@ class Trainer(object):
                     color = density_map['color']
             return sigma, color
 
+        def obj2glb(obj_path): #wip
+            ms = pymeshlab.MeshSet()
+            ms.load_new_mesh(obj_path)
+            # run filter meshing_invert_face_orientation
+            ms.meshing_invert_face_orientation()
+            ms.compute_color_transfer_vertex_to_face()
+            #simplify_mesh 
+            ms.meshing_decimation_quadric_edge_collapse(targetfacenum=20000)
+            s_obj_path = os.path.splitext(obj_path)[0] + '_s.obj'
+            self.log(f' ==> saving simplified obj to {s_obj_path}') 
+            ms.save_current_mesh(s_obj_path)
+            self.log (f' ==> saved simplified obj to {s_obj_path}') 
+            glb_path = os.path.splitext(s_obj_path)[0] + '.glb'
+            self.log(f' ==> saving simplified glb to {glb_path}') 
+            os.system(f"obj2gltf -i {s_obj_path} -o {glb_path}")
+            self.log(f' ==> saved simplified glb to {glb_path}') 
+
         vertices, triangles = extract_geometry(self.model.aabb_infer[:3], self.model.aabb_infer[3:], resolution=resolution, threshold=threshold, query_func=query_func)
-        
+        self.log(f"==> Saved obj to {save_path}")
         mcubes.export_obj(vertices, triangles, save_path)
+        for i in range(20):
+            #unit is kb
+            if os.path.getsize(save_path) > 100:
+                break
+            time.sleep(5)
+        obj2glb(save_path)
 
         #mesh = trimesh.Trimesh(vertices, triangles, process=False) # important, process=True leads to seg fault...
         #mesh.export(save_path)
