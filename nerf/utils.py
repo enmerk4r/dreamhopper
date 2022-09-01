@@ -580,9 +580,9 @@ class Trainer(object):
         if save_path is None:
             save_path = os.path.join(self.workspace, 'meshes', f'{self.name}_{self.epoch}.obj')
 
-        self.log(f"==> Saving mesh to {save_path}")
-
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
+        currentPath = os.getcwd().replace('\\','/')   
+        self.log(f"==> Saving mesh")
 
         def query_func(pts):
             with torch.no_grad():
@@ -592,37 +592,29 @@ class Trainer(object):
                     color = density_map['color']
             return sigma, color
 
-        def obj2glb(obj_path): #wip
+        def obj2ply(obj_path): #wip
             ms = pymeshlab.MeshSet()
             ms.load_new_mesh(obj_path)
-            # run filter meshing_invert_face_orientation
-            ms.meshing_invert_face_orientation()
-            ms.compute_color_transfer_vertex_to_face()
-            #simplify_mesh 
-            ms.meshing_decimation_quadric_edge_collapse(targetfacenum=20000)
-            s_obj_path = os.path.splitext(obj_path)[0] + '_s.obj'
-            self.log(f' ==> saving simplified obj to {s_obj_path}') 
-            ms.save_current_mesh(s_obj_path)
-            self.log (f' ==> saved simplified obj to {s_obj_path}') 
-            glb_path = os.path.splitext(s_obj_path)[0] + '.glb'
-            self.log(f' ==> saving simplified glb to {glb_path}') 
-            os.system(f"obj2gltf -i {s_obj_path} -o {glb_path}")
-            self.log(f' ==> saved simplified glb to {glb_path}') 
+            # #simplify_mesh 
+            # ms.meshing_decimation_quadric_edge_collapse(targetfacenum=20000)
+            # ms.meshing_decimation_edge_collapse_for_marching_cube_meshes()
+            ply_path = os.path.splitext(obj_path)[0] + '.ply'
+            self.log(f' ==> saving ply') 
+            ms.save_current_mesh(ply_path)
+            self.log (f' ==> saved ply to  {currentPath}/{ply_path}') 
 
         vertices, triangles = extract_geometry(self.model.aabb_infer[:3], self.model.aabb_infer[3:], resolution=resolution, threshold=threshold, query_func=query_func)
-        self.log(f"==> Saved obj to {save_path}")
+
+        self.log(f"==> Saving obj")
         mcubes.export_obj(vertices, triangles, save_path)
-        for i in range(20):
+        self.log(f"==> Saved obj to {currentPath}/{save_path}")
+        for i in range(6):
             #unit is kb
             if os.path.getsize(save_path) > 100:
                 break
             time.sleep(5)
-        obj2glb(save_path)
-
-        #mesh = trimesh.Trimesh(vertices, triangles, process=False) # important, process=True leads to seg fault...
-        #mesh.export(save_path)
-
-        self.log(f"==> Finished saving mesh.")
+        obj2ply(save_path)
+        self.log(f"==> Finished saving mesh to {currentPath}/{save_path}")
 
     ### ------------------------------
 

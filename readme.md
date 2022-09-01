@@ -31,9 +31,6 @@ cd dreamfields-torch
 ### Install with pip
 ```bash
 pip install -r requirements.txt
-
-# (optional) install the tcnn backbone
-pip install git+https://github.com/NVlabs/tiny-cuda-nn/#subdirectory=bindings/torch
 ```
 ###  install customized verion of pymarchingcubes
 ```bash
