@@ -34,6 +34,8 @@ import pymeshlab
 import imageio
 from rich.console import Console
 from torch_ema import ExponentialMovingAverage
+import ipyplot
+from IPython.display import clear_output
 
 import clip
 
@@ -359,6 +361,7 @@ class Trainer(object):
         if self.opt.output_dir is not None:
             os.makedirs(self.opt.output_dir, exist_ok=True)
             os.chdir(self.opt.output_dir)
+            self.current_dir = os.getcwd().replace('\\','/')   
         if self.workspace is not None:
             os.makedirs(self.workspace, exist_ok=True)        
             self.log_path = os.path.join(workspace, f"log_{self.name}.txt")
@@ -404,6 +407,18 @@ class Trainer(object):
             if self.log_ptr: 
                 print(*args, file=self.log_ptr)
                 self.log_ptr.flush() # write immediately to file
+
+    def sort_latest_img(self, dirpath, valid_extensions=('jpg','jpeg','png')):
+        # get filepaths of all files and dirs in the given dir
+        valid_files = [os.path.join(dirpath, filename) for filename in os.listdir(dirpath)]
+        # filter out directories, no-extension, and wrong extension files
+        valid_files = [f for f in valid_files if '.' in f and \
+            f.rsplit('.',1)[-1] in valid_extensions and os.path.isfile(f)]
+
+        if not valid_files:
+            raise ValueError("No valid images in %s" % dirpath)
+        valid_files.sort(key=os.path.getmtime)
+        return valid_files
 
     ### ------------------------------	
 
@@ -581,7 +596,6 @@ class Trainer(object):
             save_path = os.path.join(self.workspace, 'meshes', f'{self.name}_{self.epoch}.obj')
 
         os.makedirs(os.path.dirname(save_path), exist_ok=True)
-        currentPath = os.getcwd().replace('\\','/')   
         self.log(f"==> Saving mesh")
 
         def query_func(pts):
@@ -601,20 +615,20 @@ class Trainer(object):
             ply_path = os.path.splitext(obj_path)[0] + '.ply'
             self.log(f' ==> saving ply') 
             ms.save_current_mesh(ply_path)
-            self.log (f' ==> saved ply to  {currentPath}/{ply_path}') 
+            self.log (f' ==> saved ply to  {self.current_dir}/{ply_path}') 
 
         vertices, triangles = extract_geometry(self.model.aabb_infer[:3], self.model.aabb_infer[3:], resolution=resolution, threshold=threshold, query_func=query_func)
 
         self.log(f"==> Saving obj")
         mcubes.export_obj(vertices, triangles, save_path)
-        self.log(f"==> Saved obj to {currentPath}/{save_path}")
+        self.log(f"==> Saved obj to {self.current_dir}/{save_path}")
         for i in range(6):
             #unit is kb
             if os.path.getsize(save_path) > 100:
                 break
             time.sleep(5)
         obj2ply(save_path)
-        self.log(f"==> Finished saving mesh to {currentPath}/{save_path}")
+        self.log(f"==> Finished saving mesh to {self.current_dir}/{save_path}")
 
     ### ------------------------------
 
@@ -631,8 +645,13 @@ class Trainer(object):
                 self.save_checkpoint(full=True, best=False)
 
             if self.epoch % self.eval_interval == 0:
+                #clean output in colab to avoid collapse
+                if self.opt.colab and self.epoch % (self.eval_interval * 3) == 0:
+                     clear_output()
                 self.evaluate_one_epoch(valid_loader)
                 self.save_checkpoint(full=False, best=True)
+
+               
 
         if self.use_tensorboardX and self.local_rank == 0:
             self.writer.close()
@@ -648,15 +667,13 @@ class Trainer(object):
             save_path = os.path.join(self.workspace, 'results')
 
         os.makedirs(save_path, exist_ok=True)
-        
-        self.log(f"==> Start Test, save results to {save_path}")
+        self.log(f"==> Start Test, save results to  {self.current_dir}/{save_path}")
 
         pbar = tqdm.tqdm(total=len(loader) * loader.batch_size, bar_format='{percentage:3.0f}% {n_fmt}/{total_fmt} [{elapsed}<{remaining}, {rate_fmt}]')
         self.model.eval()
 
-        if write_video:
-            all_preds = []
-            all_preds_depth = []
+        all_preds = []
+        all_preds_depth = []
 
         with torch.no_grad():
 
@@ -679,12 +696,10 @@ class Trainer(object):
                 pred_depth = preds_depth[0].detach().cpu().numpy()[0]
                 pred_depth = (pred_depth * 255).astype(np.uint8)
 
-                if write_video:
-                    all_preds.append(pred)
-                    all_preds_depth.append(pred_depth)
-                # else:
-                    cv2.imwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_{i:04d}_rgb.jpg'), cv2.cvtColor(pred, cv2.COLOR_RGB2BGR))
-                    cv2.imwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_{i:04d}_depth.jpg'), pred_depth)
+                all_preds.append(pred)
+                all_preds_depth.append(pred_depth)
+                cv2.imwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_{i:04d}_rgb.jpg'), cv2.cvtColor(pred, cv2.COLOR_RGB2BGR))
+                cv2.imwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_{i:04d}_depth.jpg'), pred_depth)
                 pbar.update(loader.batch_size)
 
         if write_video:
@@ -692,6 +707,12 @@ class Trainer(object):
             all_preds_depth = np.stack(all_preds_depth, axis=0)
             imageio.mimwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_rgb.mp4'), all_preds, fps=25, quality=8, macro_block_size=1)
             imageio.mimwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_depth.mp4'), all_preds_depth, fps=25, quality=8, macro_block_size=1)
+
+        print(f"display images in   {self.current_dir}/{save_path}")
+
+        if self.opt.colab:
+            test_image_display = self.sort_latest_img(save_path)
+            ipyplot.plot_images(test_image_display, max_images=12, img_width=300,force_b64=True,show_url=False)
 
         self.log(f"==> Finished Test.")
     
@@ -934,8 +955,8 @@ class Trainer(object):
                 if self.local_rank == 0:
 
                     # save image
-                    save_path = os.path.join(self.workspace, 'validation', f'{self.name}_{self.epoch:04d}_{self.local_step:04d}.png')
-                    save_path_depth = os.path.join(self.workspace, 'validation', f'{self.name}_{self.epoch:04d}_{self.local_step:04d}_depth.png')
+                    save_path = os.path.join(self.workspace, 'validation', f'{self.name}_{self.epoch:04d}_{self.local_step:04d}.jpg')
+                    save_path_depth = os.path.join(self.workspace, 'validation', f'{self.name}_{self.epoch:04d}_{self.local_step:04d}_depth.jpg')
                     #save_path_gt = os.path.join(self.workspace, 'validation', f'{self.name}_{self.epoch:04d}_{self.local_step:04d}_gt.png')
 
                     #self.log(f"==> Saving validation image to {save_path}")
@@ -947,6 +968,11 @@ class Trainer(object):
 
                     pbar.set_description(f"loss={loss_val:.4f} ({total_loss/self.local_step:.4f})")
                     pbar.update(loader.batch_size)
+                
+            if self.opt.colab:
+                save_path = os.path.join(self.workspace, 'validation')
+                test_image_display = self.sort_latest_img(save_path)
+                ipyplot.plot_images(test_image_display, max_images=12, img_width=300,force_b64=True,show_url=False)
 
 
         average_loss = total_loss / self.local_step

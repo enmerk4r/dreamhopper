@@ -19,4 +19,6 @@ lpips
 imageio
 imageio-ffmpeg
 pymeshlab
+ipyplot
+IPython
 git+https://github.com/openai/CLIP.git

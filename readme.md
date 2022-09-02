@@ -6,10 +6,10 @@ Aiming to make a colab friendly dreamfield-torch version.
 ## To do list:
 - [x] Integrating Video generation.
 - [x] Export simplified obj & glb model with vertex colour.
-- [ ] Visualizing the training progress in colab.
+- [x] Visualizing the training progress in colab.
+- [ ] Improve the generation quality.
 - [ ] Release the colab notebook.
 - [ ] Exposure all useful parameters setting options in colab notebook.
-- [ ] Improve the generation quality.
 
 # dreamfields-torch (WIP)
 

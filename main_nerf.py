@@ -16,8 +16,11 @@ if __name__ == '__main__':
     parser.add_argument('--workspace', type=str, default='workspace')
     parser.add_argument('--output_dir', type=str, default='./output')
     parser.add_argument('--seed', type=int, default=-1,help="set to -1 to get random seed")
+    ### colab options
+    parser.add_argument('--colab', action='store_true', help="running in colab notebook mode")
+    parser.add_argument('--val_int', type=int, default=20, help="interval of saving and displaying intermediate output")
     ### training options
-    parser.add_argument('--iters', type=int, default=30000, help="training iters")
+    parser.add_argument('--iters', type=int, default=30000, help="training iters, the final epoch wil be divied by 100")
     parser.add_argument('--lr', type=float, default=5e-4, help="initial learning rate")
     parser.add_argument('--ckpt', type=str, default='latest')
     parser.add_argument('--num_rays', type=int, default=4096)
@@ -98,7 +101,7 @@ if __name__ == '__main__':
         # decay to 0.1 * init_lr at last iter step
         scheduler = lambda optimizer: optim.lr_scheduler.LambdaLR(optimizer, lambda iter: 0.1 ** min(iter / opt.iters, 1))
 
-        trainer = Trainer('ngp', opt, model, device=device, workspace=opt.workspace, optimizer=optimizer, ema_decay=0.95, fp16=opt.fp16, lr_scheduler=scheduler, use_checkpoint=opt.ckpt, eval_interval=20)
+        trainer = Trainer('ngp', opt, model, device=device, workspace=opt.workspace, optimizer=optimizer, ema_decay=0.95, fp16=opt.fp16, lr_scheduler=scheduler, use_checkpoint=opt.ckpt, eval_interval=opt.val_int)
 
         if opt.gui:
             from nerf.gui import NeRFGUI
