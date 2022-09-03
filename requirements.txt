@@ -11,7 +11,7 @@ matplotlib
 # PyMCubes
 # git+https://github.com/JustusThies/PyMarchingCubes.git
 rich
-pysdf
+# pysdf
 dearpygui
 packaging
 scipy

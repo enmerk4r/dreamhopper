@@ -417,7 +417,7 @@ class Trainer(object):
 
         if not valid_files:
             raise ValueError("No valid images in %s" % dirpath)
-        valid_files.sort(key=os.path.getmtime)
+        valid_files.sort(key=os.path.getmtime,reverse=True)
         return valid_files
 
     ### ------------------------------	
