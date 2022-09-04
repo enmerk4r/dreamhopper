@@ -50,6 +50,8 @@ def custom_meshgrid(*args):
 
 
 @torch.cuda.amp.autocast(enabled=False)
+
+#output the rays
 def get_rays(poses, intrinsics, H, W, N=-1, error_map=None):
     ''' get rays
     Args:
@@ -105,6 +107,7 @@ def get_rays(poses, intrinsics, H, W, N=-1, error_map=None):
     ys = (j - cy) / fy * zs
     directions = torch.stack((xs, ys, zs), dim=-1)
     directions = directions / torch.norm(directions, dim=-1, keepdim=True)
+    #In Python 3.5 you can overload @ as an operator. It is named as __matmul__, 
     rays_d = directions @ poses[:, :3, :3].transpose(-1, -2) # (B, N, 3)
 
     rays_o = poses[..., :3, 3] # [B, 3]
@@ -266,7 +269,7 @@ class Trainer(object):
         self.model = model
 
         # clip model
-        clip_model, clip_preprocess = clip.load("ViT-B/16", device=self.device, jit=False)
+        clip_model, clip_preprocess = clip.load(self.opt.clip_model, device=self.device, jit=False)
         clip_model.eval()
         for p in clip_model.parameters():
             p.requires_grad = False

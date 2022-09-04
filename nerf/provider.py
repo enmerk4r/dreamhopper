@@ -69,7 +69,7 @@ def get_view_direction(thetas, phis):
     res[thetas > (3 * np.pi / 4)] = 5
     return res
 
-
+#generate a list of random poses for the dataset
 def rand_poses(size, device, radius=1, theta_range=[np.pi/3, 2 * np.pi/3], phi_range=[0, 2*np.pi]):
     ''' generate random poses from an orbit camera
     Args:
@@ -109,7 +109,7 @@ def rand_poses(size, device, radius=1, theta_range=[np.pi/3, 2 * np.pi/3], phi_r
 
     return poses, dir
 
-
+#the class to ouput the rays / camera poses
 class NeRFDataset:
     def __init__(self, opt, device, type='train', H=128, W=128, radius=3, fovy=90, size=100):
         super().__init__()

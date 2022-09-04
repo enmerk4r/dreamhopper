@@ -28,10 +28,13 @@ if __name__ == '__main__':
     parser.add_argument('--num_steps', type=int, default=512, help="num steps sampled per ray (only valid when not using --cuda_ray)")
     parser.add_argument('--upsample_steps', type=int, default=0, help="num steps up-sampled per ray (only valid when not using --cuda_ray)")
     parser.add_argument('--max_ray_batch', type=int, default=4096, help="batch size of rays at inference to avoid OOM (only valid when not using --cuda_ray)")
+    parser.add_argument('--clip_model', type=str, default='ViT-B/16',help="the clip applied")
      ### test options
     parser.add_argument('--test', action='store_true', help="test mode")
     parser.add_argument('--save_video', action='store_true', help="save video in testing")
     parser.add_argument('--test_samples', type=int, default=10, help="set the total frames of video output")
+    parser.add_argument('--mesh_res', type=int, default=256, help="the resolution of mesh grid")
+    parser.add_argument('--mesh_trh', type=int, default=10, help="the threshold of marching cube")
     ## network backbone options
     parser.add_argument('--fp16', action='store_true', help="use amp mixed precision training")
     parser.add_argument('--cc', action='store_true', help="use TensoRF")
@@ -89,13 +92,13 @@ if __name__ == '__main__':
         
         else:
             test_loader = NeRFDataset(opt, device=device, type='test', H=opt.H, W=opt.W, radius=opt.radius, fovy=opt.fovy, size=opt.test_samples).dataloader()
-            trainer.save_mesh(resolution=256, threshold=10)
+            trainer.save_mesh(resolution=opt.mesh_res, threshold=opt.mesh_trh)
             trainer.test(test_loader, write_video=opt.save_video) # test and save video
     
     else:
 
         optimizer = lambda model: torch.optim.Adam(model.get_params(opt.lr), betas=(0.9, 0.99), eps=1e-15)
-
+        # get the camera parameters here
         train_loader = NeRFDataset(opt, device=device, type='train', H=opt.h, W=opt.w, radius=opt.radius, fovy=opt.fovy, size=100).dataloader()
 
         # decay to 0.1 * init_lr at last iter step
@@ -118,5 +121,5 @@ if __name__ == '__main__':
 
             # also test
             test_loader = NeRFDataset(opt, device=device, type='test', H=opt.H, W=opt.W, radius=opt.radius, fovy=opt.fovy, size=opt.test_samples).dataloader()
-            trainer.save_mesh(resolution=256, threshold=10)
+            trainer.save_mesh(resolution=opt.mesh_res, threshold=opt.mesh_trh)
             trainer.test(test_loader, write_video=opt.save_video) # test and save video
