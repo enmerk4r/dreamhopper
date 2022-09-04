@@ -19,6 +19,7 @@ if __name__ == '__main__':
     ### colab options
     parser.add_argument('--colab', action='store_true', help="running in colab notebook mode")
     parser.add_argument('--val_int', type=int, default=20, help="interval of saving and displaying intermediate output")
+    parser.add_argument('--save_interval_img', action='store_true', help="if save interval images")
     ### training options
     parser.add_argument('--iters', type=int, default=30000, help="training iters, the final epoch wil be divied by 100")
     parser.add_argument('--lr', type=float, default=5e-4, help="initial learning rate")
@@ -32,6 +33,7 @@ if __name__ == '__main__':
      ### test options
     parser.add_argument('--test', action='store_true', help="test mode")
     parser.add_argument('--save_video', action='store_true', help="save video in testing")
+    parser.add_argument('--save_mesh', action='store_true', help="save video in testing")
     parser.add_argument('--test_samples', type=int, default=10, help="set the total frames of video output")
     parser.add_argument('--mesh_res', type=int, default=256, help="the resolution of mesh grid")
     parser.add_argument('--mesh_trh', type=int, default=10, help="the threshold of marching cube")
@@ -92,7 +94,8 @@ if __name__ == '__main__':
         
         else:
             test_loader = NeRFDataset(opt, device=device, type='test', H=opt.H, W=opt.W, radius=opt.radius, fovy=opt.fovy, size=opt.test_samples).dataloader()
-            trainer.save_mesh(resolution=opt.mesh_res, threshold=opt.mesh_trh)
+            if opt.save_mesh:
+                trainer.save_mesh(resolution=opt.mesh_res, threshold=opt.mesh_trh)
             trainer.test(test_loader, write_video=opt.save_video) # test and save video
     
     else:
@@ -115,7 +118,6 @@ if __name__ == '__main__':
         
         else:
             valid_loader = NeRFDataset(opt, device=device, type='val', H=opt.H, W=opt.W, radius=opt.radius, fovy=opt.fovy, size=10).dataloader()
-
             max_epoch = np.ceil(opt.iters / len(train_loader)).astype(np.int32)
             trainer.train(train_loader, valid_loader, max_epoch)
 

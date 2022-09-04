@@ -953,30 +953,32 @@ class Trainer(object):
                 
                 loss_val = loss.item()
                 total_loss += loss_val
-
                 # only rank = 0 will perform evaluation.
                 if self.local_rank == 0:
-
                     # save image
-                    save_path = os.path.join(self.workspace, 'validation', f'{self.name}_{self.epoch:04d}_{self.local_step:04d}.jpg')
-                    save_path_depth = os.path.join(self.workspace, 'validation', f'{self.name}_{self.epoch:04d}_{self.local_step:04d}_depth.jpg')
+                    if self.opt.save_interval_img:
+                        save_path = os.path.join(self.workspace, 'validation', f'{self.name}_{self.epoch:04d}_{self.local_step:04d}.jpg')
+                        save_path_depth = os.path.join(self.workspace, 'validation', f'{self.name}_{self.epoch:04d}_{self.local_step:04d}_depth.jpg')
+                    else:
+                        save_path = os.path.join(self.workspace, 'validation', f'{self.name}_{self.local_step:04d}.jpg')
+                        save_path_depth = os.path.join(self.workspace, 'validation', f'{self.name}_{self.local_step:04d}_depth.jpg')
                     #save_path_gt = os.path.join(self.workspace, 'validation', f'{self.name}_{self.epoch:04d}_{self.local_step:04d}_gt.png')
 
                     #self.log(f"==> Saving validation image to {save_path}")
                     os.makedirs(os.path.dirname(save_path), exist_ok=True)
-
-                    cv2.imwrite(save_path, cv2.cvtColor((preds[0].detach().cpu().numpy().transpose(1, 2, 0) * 255).astype(np.uint8), cv2.COLOR_RGB2BGR))
-                    cv2.imwrite(save_path_depth, (preds_depth[0].detach().cpu().numpy()[0] * 255).astype(np.uint8))
-                    #cv2.imwrite(save_path_gt, cv2.cvtColor((truths[0].detach().cpu().numpy() * 255).astype(np.uint8), cv2.COLOR_RGB2BGR))
+                    pred_rgb = (preds[0].detach().cpu().numpy().transpose(1, 2, 0) * 255).astype(np.uint8)
+                    pred_bgr = cv2.cvtColor(pred_rgb, cv2.COLOR_RGB2BGR)
+                    cv2.imwrite(save_path, pred_rgb)
+                    pred_depth_rgb =  (preds_depth[0].detach().cpu().numpy()[0] * 255).astype(np.uint8)
+                    cv2.imwrite(save_path_depth, pred_depth_rgb)
 
                     pbar.set_description(f"loss={loss_val:.4f} ({total_loss/self.local_step:.4f})")
                     pbar.update(loader.batch_size)
-                
+
             if self.opt.colab:
                 save_path = os.path.join(self.workspace, 'validation')
                 test_image_display = self.sort_latest_img(save_path)
                 ipyplot.plot_images(test_image_display, max_images=12, img_width=300,force_b64=True,show_url=False)
-
 
         average_loss = total_loss / self.local_step
         self.stats["valid_loss"].append(average_loss)
