@@ -716,9 +716,9 @@ class Trainer(object):
         print(f"display images in   {self.current_dir}/{save_path}")
 
         if self.opt.colab:
-            test_image_display = self.sort_latest_img(save_path)
+            test_image_display = random.sample(self.sort_latest_img(save_path), 20)
             ipyplot.plot_images(test_image_display, max_images=20, img_width=300,force_b64=True,show_url=False)
-
+            self.log(f"only show random 20 samples in colab. The rest out images could be found under project folder.")
         self.log(f"==> Finished Test.")
     
     # [GUI] train text step.
