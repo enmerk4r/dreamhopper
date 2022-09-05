@@ -667,7 +667,7 @@ class Trainer(object):
     def test(self, loader, save_path=None, name=None, write_video=True):
 
         if save_path is None:
-            save_path = os.path.join(self.workspace, 'results')
+            save_path = os.path.join(self.workspace, 'images')
 
         os.makedirs(save_path, exist_ok=True)
         self.log(f"==> Start Test, save results to  {self.current_dir}/{save_path}")
@@ -706,16 +706,18 @@ class Trainer(object):
                 pbar.update(loader.batch_size)
 
         if write_video:
+            save_path_video = os.path.join(self.workspace, 'videos')
+            os.makedirs(save_path_video, exist_ok=True)
             all_preds = np.stack(all_preds, axis=0)
             all_preds_depth = np.stack(all_preds_depth, axis=0)
-            imageio.mimwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_rgb.mp4'), all_preds, fps=25, quality=8, macro_block_size=1)
-            imageio.mimwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_depth.mp4'), all_preds_depth, fps=25, quality=8, macro_block_size=1)
+            imageio.mimwrite(os.path.join(save_path_video,f'{self.name}_{self.epoch}_depth.mp4'), all_preds_depth, fps=20, quality=8, macro_block_size=1)
+            imageio.mimwrite(os.path.join(save_path_video,f'{self.name}_{self.epoch}_rgb.mp4'), all_preds, fps=20, quality=8, macro_block_size=1)
 
         print(f"display images in   {self.current_dir}/{save_path}")
 
         if self.opt.colab:
             test_image_display = self.sort_latest_img(save_path)
-            ipyplot.plot_images(test_image_display, max_images=12, img_width=300,force_b64=True,show_url=False)
+            ipyplot.plot_images(test_image_display, max_images=20, img_width=300,force_b64=True,show_url=False)
 
         self.log(f"==> Finished Test.")
     
@@ -968,7 +970,7 @@ class Trainer(object):
                     os.makedirs(os.path.dirname(save_path), exist_ok=True)
                     pred_rgb = (preds[0].detach().cpu().numpy().transpose(1, 2, 0) * 255).astype(np.uint8)
                     pred_bgr = cv2.cvtColor(pred_rgb, cv2.COLOR_RGB2BGR)
-                    cv2.imwrite(save_path, pred_rgb)
+                    cv2.imwrite(save_path, pred_bgr)
                     pred_depth_rgb =  (preds_depth[0].detach().cpu().numpy()[0] * 255).astype(np.uint8)
                     cv2.imwrite(save_path_depth, pred_depth_rgb)
 

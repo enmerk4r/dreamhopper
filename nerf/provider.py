@@ -70,14 +70,14 @@ def get_view_direction(thetas, phis):
     return res
 
 #generate a list of random poses for the dataset
-def rand_poses(size, device, radius=1, theta_range=[np.pi/3, 2 * np.pi/3], phi_range=[0, 2*np.pi]):
+def rand_poses(size, device, radius=1, theta_range=[np.pi/3, 2 * np.pi/3], phi_range=[0, 2*np.pi],randomize=True, sample_size=0, index=0):
     ''' generate random poses from an orbit camera
     Args:
-        size: batch size of generated poses.
+        size: batch size of generated poses. (always 1 for now)
         device: where to allocate the output.
         radius: camera radius
-        theta_range: [min, max], should be in [0, \pi]
-        phi_range: [min, max], should be in [0, 2\pi]
+        theta_range: [min, max], should be in [0, \pi]; vertical angle
+        phi_range: [min, max], should be in [0, 2\pi]; horizontal angle
     Return:
         poses: [size, 4, 4]
     '''
@@ -85,8 +85,14 @@ def rand_poses(size, device, radius=1, theta_range=[np.pi/3, 2 * np.pi/3], phi_r
     def normalize(vectors):
         return vectors / (torch.norm(vectors, dim=-1, keepdim=True) + 1e-10)
 
-    thetas = torch.rand(size, device=device) * (theta_range[1] - theta_range[0]) + theta_range[0]
-    phis = torch.rand(size, device=device) * (phi_range[1] - phi_range[0]) + phi_range[0]
+    if randomize:
+        thetas = torch.rand(size, device=device) * (theta_range[1] - theta_range[0]) + theta_range[0]
+        phis = torch.rand(size, device=device) * (phi_range[1] - phi_range[0]) + phi_range[0]
+    else:
+        #not batch run, but run one by one, that is why i always get zero
+        thetas = torch.ones(size, device=device) * (index / (sample_size-1)) * (theta_range[1] - theta_range[0]) + theta_range[0]
+        # thetas = torch.ones(size, device=device)  * (theta_range[1] - theta_range[0]) + theta_range[0]
+        phis = torch.ones(size, device=device)* (index / (sample_size-1)) * (phi_range[1] - phi_range[0]) + phi_range[0]
 
     dir = get_view_direction(thetas, phis)
 
@@ -144,8 +150,12 @@ class NeRFDataset:
 
         B = len(index) # always 1
 
-        # random pose
-        poses, dir = rand_poses(B, self.device, radius=self.radius)
+        # get (random) pose
+        if  self.type == 'test':
+            poses, dir = rand_poses(B, self.device, radius=self.radius,theta_range=[np.pi/3, 2* np.pi/3], phi_range=[0, 2*np.pi],randomize=False, sample_size=self.size, index=index[0])
+        else:
+            poses, dir = rand_poses(B, self.device, radius=self.radius,theta_range=[np.pi/3,   2 * np.pi/3], phi_range=[0, 2*np.pi],randomize=True, sample_size=self.size, index=index[0])
+           
 
         # sample a low-resolution but full image for CLIP
         rays = get_rays(poses, self.intrinsics, self.H, self.W, -1)
@@ -159,6 +169,6 @@ class NeRFDataset:
         }
 
     def dataloader(self):
-        loader = DataLoader(list(range(self.size)), batch_size=1, collate_fn=self.collate, shuffle=self.training, num_workers=0)
+        loader = DataLoader(list(range(self.size)), batch_size=1, collate_fn=self.collate, shuffle=False, num_workers=0)
         loader._data = self # an ugly fix... we need to access error_map & poses in trainer.
         return loader
