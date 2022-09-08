@@ -24,12 +24,15 @@ if __name__ == '__main__':
     parser.add_argument('--iters', type=int, default=30000, help="training iters, the final epoch wil be divied by 100")
     parser.add_argument('--lr', type=float, default=5e-4, help="initial learning rate")
     parser.add_argument('--ckpt', type=str, default='latest')
+    parser.add_argument('--ckpt_save_interval', type=int, default=50)
     parser.add_argument('--num_rays', type=int, default=4096)
     parser.add_argument('--cuda_ray', action='store_true', help="use CUDA raymarching instead of pytorch")
     parser.add_argument('--num_steps', type=int, default=512, help="num steps sampled per ray (only valid when not using --cuda_ray)")
     parser.add_argument('--upsample_steps', type=int, default=0, help="num steps up-sampled per ray (only valid when not using --cuda_ray)")
     parser.add_argument('--max_ray_batch', type=int, default=4096, help="batch size of rays at inference to avoid OOM (only valid when not using --cuda_ray)")
     parser.add_argument('--clip_model', type=str, default='ViT-B/16',help="the clip applied")
+    parser.add_argument('--clip_aug', action='store_true', help="use random augmentation for the render iamge before feed into clip")
+
      ### test options
     parser.add_argument('--test', action='store_true', help="test mode")
     parser.add_argument('--save_video', action='store_true', help="save video in testing")
@@ -43,8 +46,8 @@ if __name__ == '__main__':
     ### dataset options
     parser.add_argument('--bound', type=float, default=1, help="assume the scene is bounded in box(-bound, bound)")
     parser.add_argument('--dt_gamma', type=float, default=0, help="dt_gamma (>=0) for adaptive ray marching. set to 0 to disable, >0 to accelerate rendering (but usually with worse quality)")
-    parser.add_argument('--w', type=int, default=128, help="render width for CLIP training (<=224)")
-    parser.add_argument('--h', type=int, default=128, help="render height for CLIP training (<=224)")
+    parser.add_argument('--w', type=int, default=128, help="render width for CLIP training (significantly affect the GPU RAM ocupy)")
+    parser.add_argument('--h', type=int, default=128, help="render height for CLIP training (significantly affect the GPU RAM ocupy)")
     ### GUI options
     parser.add_argument('--gui', action='store_true', help="start a GUI")
     parser.add_argument('--W', type=int, default=800, help="GUI width")

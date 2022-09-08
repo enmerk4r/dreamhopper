@@ -1,15 +1,40 @@
 # dreamfield-torch-colab (WIP)
 
-Aiming to make a colab friendly dreamfield-torch version.  
-**Since I am a beginner of coding, no guarantee for the progress and code quality, and welcome to contribute to this repository :)**
+A colab friendly toolkit to generate 3D mesh model / video / nerf instance / multiview images of colourful 3D objects by text and image prompts input. Edited by [Shengyu Meng (Simon)](https://twitter.com/meng_shengyu)  
 
-## To do list:
+Check the colab for the usage.
+
+Dreamfields-3D is modified from [dreamfields-torch](https://github.com/ashawkey/dreamfields-torch) and [dreamfields](https://github.com/google-research/google-research/tree/master/dreamfields), please check the [Credits.md](./notebook/Credits.md) for details.
+
+**Attention: ** Since I am a beginner of coding, no guarantee for the code quality, and welcome to contribute to this repository :smile: 
+
+vide:
+
+## Main Contributions:
 - [x] Integrating Video generation.
-- [x] Export simplified obj & glb model with vertex colour.
-- [x] Visualizing the training progress in colab.
-- [ ] Improve the generation quality.
+- [x] Export obj & glb model with vertex colour.
+- [x] Export  360° Video of final model.
+- [x] Make it running friendly in colab	
+  - [x] Visualizing the training progress in colab.
+  - [x] Preview the output video in colab
+- [x] Improve the generation quality.
+  - [x] Implements multiple CLIP model.
+  - [x] Improve the pre-process of the images before feeding into CLIP.
+- [x] More useful augments options.
 - [ ] Release the colab notebook.
-- [ ] Exposure all useful parameters setting options in colab notebook.
+
+## Compatibility:
+
+- About system: 
+  - Colab: Pass on goolge Colab (tested on A100/v100/P100 GPU at 08/09/2022)
+  - Ubuntu: The previous version (dreamfields-torch) has successfully ran on Ubuntu 18.04 with RTX 3090. Not tested for the dreamfields-3D yet, but mostly should be fined.
+  - Windows: It should be work in windows with proper environment, but I failed to build the raymarching in several windows machine. More test will be required.
+- About GUI:
+  - When it run on local machine, GUI is supported. However, some new features maybe not available in GUI model.
+
+> 👇 Bellow readme from the dreamfields-torch repository.
+
+-------------------------------
 
 # dreamfields-torch (WIP)
 

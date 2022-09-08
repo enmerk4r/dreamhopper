@@ -276,21 +276,35 @@ class Trainer(object):
         
         self.clip_model = clip_model
         self.clip_preprocess = clip_preprocess
+      
+        if self.opt.clip_model =="ViT-L/14@336px":
+            crop_size = 336
+        else:
+            crop_size = 224
 
         # image augmentation
-        self.aug = T.Compose([
-            T.RandomCrop((self.opt.h - 16, self.opt.w - 16)),
-            T.Resize((224, 224)),
+        if self.opt.clip_aug:
+            self.aug = T.Compose([
+            T.RandomResizedCrop(crop_size,scale=(0.25, 1.0)),
+            T.RandomAffine(15), 
+            T.ColorJitter(brightness=(0.5,1),contrast=(0.2,0.9),saturation=(0.3,1),hue=(-0.2,0.2)),
             T.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)),
-        ])
-
+            ])
+        else:
+            self.aug = T.Compose([
+                T.RandomCrop((self.opt.h - 16, self.opt.w - 16)),
+                T.Resize((crop_size, crop_size)),
+                T.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)),
+            ])
+        
+        #the gaussian blur is only used for bg augmentation not for image itself
         self.gaussian_blur = T.GaussianBlur(15, sigma=(0.1, 10))
+        # T.RandomAdjustSharpness(1+ramdom.random(), 0.9)
 
         self.aug_eval = T.Compose([
             T.Resize((224, 224)),
             T.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)),
         ])
-
 
         # text prompt
         ref_text = self.opt.text
@@ -431,6 +445,7 @@ class Trainer(object):
         rays_d = data['rays_d'] # [B, N, 3]
 
         B, N = rays_o.shape[:2]
+        #the H and W in training is clip h and w
         H, W = data['H'], data['W']
 
         # currently fix white bg, MUST force all rays!
@@ -1034,7 +1049,8 @@ class Trainer(object):
             if len(self.stats["checkpoints"]) > self.max_keep_ckpt:
                 old_ckpt = self.stats["checkpoints"].pop(0)
                 if os.path.exists(old_ckpt):
-                    os.remove(old_ckpt)
+                    if int (old_ckpt[-12:-8]) % self.opt.ckpt_save_interval != 0:
+                        os.remove(old_ckpt)
 
             torch.save(state, file_path)
 
