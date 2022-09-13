@@ -1,36 +1,45 @@
-# dreamfield-torch-colab (WIP)
+# dreamfields-3D
 
 A colab friendly toolkit to generate 3D mesh model / video / nerf instance / multiview images of colourful 3D objects by text and image prompts input. Edited by [Shengyu Meng (Simon)](https://twitter.com/meng_shengyu)  
 
-Check the colab for the usage.
+Check the colab notebook for usage.
 
 Dreamfields-3D is modified from [dreamfields-torch](https://github.com/ashawkey/dreamfields-torch) and [dreamfields](https://github.com/google-research/google-research/tree/master/dreamfields), please check the [Credits.md](./notebook/Credits.md) for details.
 
-**Attention: ** Since I am a beginner of coding, no guarantee for the code quality, and welcome to contribute to this repository :smile: 
-
-vide:
+video:
 
 ## Main Contributions:
 - [x] Integrating Video generation.
-- [x] Export obj & glb model with vertex colour.
+- [x] Export obj & ply model with vertex colour.
 - [x] Export  360° Video of final model.
-- [x] Make it running friendly in colab	
-  - [x] Visualizing the training progress in colab.
-  - [x] Preview the output video in colab
+- [x] Visualizing the training progress and preview the output video in colab.
 - [x] Improve the generation quality.
   - [x] Implements multiple CLIP model.
-  - [x] Improve the pre-process of the images before feeding into CLIP.
-- [x] More useful augments options.
-- [ ] Release the colab notebook.
+  - [x] Improve the pre-process of the renderings before feeding into CLIP.
+- [x] Add more useful arguments.
+- [ ] Organize the colab notebook.
+## Future update plan:
+
+- [ ] Use different CLIP models simultaneously.
+- [ ] Apply the image prompt only in certain assigned direction.
+- [ ] Read existing mesh as NeRF instance then modify by text / image prompts.
+- [ ] Reduce the usage of GPU RAM occupation in training.
+
+I am a coding beginner, cannot promise for the progress, and welcome to contribute to this repository :smile: .
 
 ## Compatibility:
 
 - About system: 
-  - Colab: Pass on goolge Colab (tested on A100/v100/P100 GPU at 08/09/2022)
+  - Colab: Pass on google Colab (tested on A100/v100/P100 GPU at 08/09/2022)
   - Ubuntu: The previous version (dreamfields-torch) has successfully ran on Ubuntu 18.04 with RTX 3090. Not tested for the dreamfields-3D yet, but mostly should be fined.
-  - Windows: It should be work in windows with proper environment, but I failed to build the raymarching in several windows machine. More test will be required.
+  - Windows: It should be work in windows with proper environment, but I failed to build the raymarching extension in different windows machine. More test will be required.
+  - For locally running, please refer to the installation guide of dreamfields-torch bellow.
+- About Exporting 3D model:
+  - The 3D models will be exported as obj and ply format with vertex colour. 
+  - Mesh with vertex colour could be seen in meshLab and Rhino3D. 
+  - For viewing colour in Blender, please import the ply model frist, then create a new material, and plug a Color Attribute node into the base color in shader editor, then you should see the vertex colour.
 - About GUI:
-  - When it run on local machine, GUI is supported. However, some new features maybe not available in GUI model.
+  - GUI is supported only when running locally. However, some new features maybe not available in GUI model. I would recommend to train without GUI first, then run test on the pretrained model in GUI, to browse the final 3D NeRF instance.
 
 > 👇 Bellow readme from the dreamfields-torch repository.
 
