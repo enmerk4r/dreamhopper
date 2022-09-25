@@ -5,7 +5,6 @@ import random
 from nerf.provider import NeRFDataset
 from nerf.utils import *
 
-
 #torch.autograd.set_detect_anomaly(True)
 
 if __name__ == '__main__':
@@ -32,7 +31,7 @@ if __name__ == '__main__':
     parser.add_argument('--max_ray_batch', type=int, default=4096, help="batch size of rays at inference to avoid OOM (only valid when not using --cuda_ray)")
     parser.add_argument('--clip_model', type=str, default='ViT-B/16',help="the clip applied")
     parser.add_argument('--clip_aug', action='store_true', help="use random augmentation for the render iamge before feed into clip")
-
+    parser.add_argument('--rnd_fovy', action='store_true', help="use random fovy (view angle in traning")
      ### test options
     parser.add_argument('--test', action='store_true', help="test mode")
     parser.add_argument('--save_video', action='store_true', help="save video in testing")
@@ -53,7 +52,7 @@ if __name__ == '__main__':
     parser.add_argument('--W', type=int, default=800, help="GUI width")
     parser.add_argument('--H', type=int, default=800, help="GUI height")
     parser.add_argument('--radius', type=float, default=3, help="default GUI camera radius from center")
-    parser.add_argument('--fovy', type=float, default=90, help="default GUI camera fovy")
+    parser.add_argument('--fovy', type=float, default=90, help="default GUI camera fovy (view angle)")
     parser.add_argument('--max_spp', type=int, default=64, help="GUI rendering max sample per pixel")
     ### other options
     parser.add_argument('--tau_0', type=float, default=0.5, help="target mean transparency 0")

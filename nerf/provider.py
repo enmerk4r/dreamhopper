@@ -4,6 +4,7 @@ import glob
 import json
 import tqdm
 import numpy as np
+import random
 from scipy.spatial.transform import Slerp, Rotation
 
 import trimesh
@@ -132,13 +133,6 @@ class NeRFDataset:
 
         self.training = self.type in ['train', 'all']
         self.num_rays = self.opt.num_rays if self.training else -1
-
-        fl_y = self.H / (2 * np.tan(np.radians(self.fovy) / 2))
-        fl_x = fl_y
-        cx = self.H / 2
-        cy = self.W / 2
-        self.intrinsics = np.array([fl_x, fl_y, cx, cy])
-
         self.dir = ['front', 'left side', 'back', 'right side', 'top', 'bottom'];
 
         # [debug] visualize poses
@@ -147,7 +141,6 @@ class NeRFDataset:
 
 
     def collate(self, index):
-
         B = len(index) # always 1
 
         # get (random) pose
@@ -156,8 +149,17 @@ class NeRFDataset:
         else:
             poses, dir = rand_poses(B, self.device, radius=self.radius,theta_range=[np.pi/3,   2 * np.pi/3], phi_range=[0, 2*np.pi],randomize=True, sample_size=self.size, index=index[0])
            
-
         # sample a low-resolution but full image for CLIP
+        # lower fovy will occupy more pixels and GPU RAM ; minimum 40 in 16G GPU
+        if self.training and self.opt.rnd_fovy:
+            if random.random( )<0.5:
+                fl_y = self.H / (2 * np.tan(np.radians(self.fovy) / 2))
+            else:
+                fl_y = self.H / (2 * np.tan(np.radians(random.randint(43,100)) / 2))
+        else:
+            fl_y = self.H / (2 * np.tan(np.radians(self.fovy) / 2))
+        fl_x = fl_y
+        self.intrinsics = np.array([fl_x, fl_y, self.H / 2, self.W / 2])
         rays = get_rays(poses, self.intrinsics, self.H, self.W, -1)
 
         return {

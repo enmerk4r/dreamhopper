@@ -282,12 +282,14 @@ class Trainer(object):
         else:
             crop_size = 224
 
-        # image augmentation
+        # image augmentation https://pytorch.org/vision/main/transforms.html
         if self.opt.clip_aug:
             self.aug = T.Compose([
-            T.RandomResizedCrop(crop_size,scale=(0.25, 1.0)),
-            T.RandomAffine(15), 
-            T.ColorJitter(brightness=(0.5,1),contrast=(0.2,0.9),saturation=(0.3,1),hue=(-0.2,0.2)),
+            T.RandomResizedCrop(crop_size,scale=(0.7, 1.0)),
+            # T.GaussianBlur(kernel_size=(1, 3), sigma=(0.1, 1)),
+            T.ColorJitter(brightness=(0.2),contrast=(0.2),saturation=(0.2)),
+            # T.ColorJitter(brightness=(0.2),contrast=(0.2),saturation=(0.2),hue=(0.25)),
+            # T.Resize((crop_size, crop_size)),
             T.Normalize((0.48145466, 0.4578275, 0.40821073), (0.26862954, 0.26130258, 0.27577711)),
             ])
         else:
