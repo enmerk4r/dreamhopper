@@ -6,6 +6,8 @@ Check the colab notebook for usage. [![Open In Colab](https://colab.research.goo
 
 Dreamfields-3D is modified from [dreamfields-torch](https://github.com/ashawkey/dreamfields-torch) and [dreamfields](https://github.com/google-research/google-research/tree/master/dreamfields), please check the [Credits.md](./notebook/Credits.md) for details.
 
+![2](https://user-images.githubusercontent.com/17877083/192669406-d2d556cb-2e18-44e4-9c84-b20a7018d2a2.jpg)
+
 ## Update logs
 
 **Beta v0.6** : Apply random fovy (view angle) in training; update image augmentation before feed into CLIP; improve training stability and performance. (2022-09-25)
