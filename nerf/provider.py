@@ -142,13 +142,13 @@ class NeRFDataset:
 
     def collate(self, index):
         B = len(index) # always 1
-
-        # get (random) pose
-        if  self.type == 'test':
-            poses, dir = rand_poses(B, self.device, radius=self.radius,theta_range=[np.pi/3, 2* np.pi/3], phi_range=[0, 2*np.pi],randomize=False, sample_size=self.size, index=index[0])
-        else:
+        
+        if self.training:
+            # get (random) pose
             poses, dir = rand_poses(B, self.device, radius=self.radius,theta_range=[np.pi/3,   2 * np.pi/3], phi_range=[0, 2*np.pi],randomize=True, sample_size=self.size, index=index[0])
-           
+        else:
+            poses, dir = rand_poses(B, self.device, radius=self.radius,theta_range=[np.pi/3, 2* np.pi/3], phi_range=[0, 2*np.pi],randomize=False, sample_size=self.size, index=index[0])
+
         # sample a low-resolution but full image for CLIP
         # lower fovy will occupy more pixels and GPU RAM ; minimum 40 in 16G GPU
         if self.training and self.opt.rnd_fovy:

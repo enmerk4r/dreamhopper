@@ -260,6 +260,7 @@ class Trainer(object):
         self.scheduler_update_every_step = scheduler_update_every_step
         self.device = device if device is not None else torch.device(f'cuda:{local_rank}' if torch.cuda.is_available() else 'cpu')
         self.console = Console()
+        self.direction_list = ['front', 'left side', 'back', 'right side', 'top', 'bottom']
         # self.output_dir = Path(self.opt.output_dir)
 
         model.to(self.device)
@@ -285,7 +286,7 @@ class Trainer(object):
         # image augmentation https://pytorch.org/vision/main/transforms.html
         if self.opt.clip_aug:
             self.aug = T.Compose([
-            T.RandomResizedCrop(crop_size,scale=(0.7, 1.0)),
+            T.RandomResizedCrop(crop_size,scale=(0.6, 1.0)),
             # T.GaussianBlur(kernel_size=(1, 3), sigma=(0.1, 1)),
             T.ColorJitter(brightness=(0.2),contrast=(0.2),saturation=(0.2)),
             # T.ColorJitter(brightness=(0.2),contrast=(0.2),saturation=(0.2),hue=(0.25)),
@@ -316,7 +317,9 @@ class Trainer(object):
                 self.text_z = self.clip_model.encode_text(text)
             else:
                 texts = []
-                for d in ['front', 'left side', 'back', 'right side', 'top', 'bottom']:
+                #not distinguish between left and right side
+                # for d in ['front', 'left side', 'back', 'right side', 'top', 'bottom']:
+                for d in self.direction_list:
                     text = f"The {d} view of {ref_text}"
                     texts.append(text)
                 texts = clip.tokenize(texts).to(self.device)
@@ -427,7 +430,7 @@ class Trainer(object):
                 print(*args, file=self.log_ptr)
                 self.log_ptr.flush() # write immediately to file
 
-    def sort_latest_img(self, dirpath, valid_extensions=('jpg','jpeg','png')):
+    def sort_images(self, dirpath, valid_extensions=('jpg','jpeg','png')):
         # get filepaths of all files and dirs in the given dir
         valid_files = [os.path.join(dirpath, filename) for filename in os.listdir(dirpath)]
         # filter out directories, no-extension, and wrong extension files
@@ -436,7 +439,8 @@ class Trainer(object):
 
         if not valid_files:
             raise ValueError("No valid images in %s" % dirpath)
-        valid_files.sort(key=os.path.getmtime,reverse=True)
+        # valid_files.sort(key=os.path.getmtime,reverse=True)
+        valid_files = sorted(valid_files)
         return valid_files
 
     ### ------------------------------	
@@ -500,9 +504,17 @@ class Trainer(object):
 
             loss_clip = loss_clip - (image_z * text_z).sum(-1).mean()
 
+        #Only use image prompt in assigned direction
         if self.ref_image_z is not None:
-            loss_clip = loss_clip - (image_z * self.ref_image_z).sum(-1).mean()
-
+            if self.opt.image_direction is not None:
+                dirs = int(data['dir']) 
+                if self.opt.image_direction == self.direction_list[dirs]:
+                    # self.log(f"[INFO] Using reference image for {self.opt.image_direction}")
+                    loss_clip = loss_clip - (image_z * self.ref_image_z).sum(-1).mean()
+                # else: 
+                #     loss_clip = loss_clip - (image_z * self.ref_image_z).sum(-1).mean()*0.25
+            else:
+                loss_clip = loss_clip - (image_z * self.ref_image_z).sum(-1).mean()
 
         # transmittance loss
         pred_tr = (1 - pred_ws) * mask_ws # [B, 1, H, W], T = 1 - weights_sum
@@ -561,9 +573,16 @@ class Trainer(object):
 
             loss_clip = loss_clip - (image_z * text_z).sum(-1).mean()
 
+        #Only use image prompt in assigned direction
         if self.ref_image_z is not None:
-            loss_clip = loss_clip - (image_z * self.ref_image_z).sum(-1).mean()
-
+            if self.opt.image_direction is not None:
+                dirs = int(data['dir']) 
+                if self.opt.image_direction == self.direction_list[dirs]:
+                    loss_clip = loss_clip - (image_z * self.ref_image_z).sum(-1).mean()
+                # else: 
+                #     loss_clip = loss_clip - (image_z * self.ref_image_z).sum(-1).mean()*0.25
+            else:
+                loss_clip = loss_clip - (image_z * self.ref_image_z).sum(-1).mean()
 
         # transmittance loss
         pred_tr = (1 - pred_ws) * mask_ws # [B, 1, H, W], T = 1 - weights_sum
@@ -626,7 +645,7 @@ class Trainer(object):
                     color = density_map['color']
             return sigma, color
 
-        def obj2ply(obj_path): #wip
+        def obj2ply(obj_path): 
             ms = pymeshlab.MeshSet()
             ms.load_new_mesh(obj_path)
             # #simplify_mesh 
@@ -719,7 +738,8 @@ class Trainer(object):
                 all_preds.append(pred)
                 all_preds_depth.append(pred_depth)
                 cv2.imwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_{i:04d}_rgb.jpg'), cv2.cvtColor(pred, cv2.COLOR_RGB2BGR))
-                cv2.imwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_{i:04d}_depth.jpg'), pred_depth)
+                if self.opt.save_depth:
+                    cv2.imwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_{i:04d}_depth.jpg'), pred_depth)
                 pbar.update(loader.batch_size)
 
         if write_video:
@@ -733,9 +753,9 @@ class Trainer(object):
         print(f"display images in   {self.current_dir}/{save_path}")
 
         if self.opt.colab:
-            test_image_display = random.sample(self.sort_latest_img(save_path), 20)
-            ipyplot.plot_images(test_image_display, max_images=20, img_width=300,force_b64=True,show_url=False)
-            self.log(f"only show random 20 samples in colab. The rest out images could be found under project folder.")
+            test_image_display = random.sample(self.sort_images(save_path), 12)
+            ipyplot.plot_images(test_image_display, max_images=12, img_width=300,force_b64=True,show_url=False)
+            self.log(f"only show random 12 samples in colab. The rest out images could be found under project folder.")
         self.log(f"==> Finished Test.")
     
     # [GUI] train text step.
@@ -977,26 +997,29 @@ class Trainer(object):
                     # save image
                     if self.opt.save_interval_img:
                         save_path = os.path.join(self.workspace, 'validation', f'{self.name}_{self.epoch:04d}_{self.local_step:04d}.jpg')
-                        save_path_depth = os.path.join(self.workspace, 'validation', f'{self.name}_{self.epoch:04d}_{self.local_step:04d}_depth.jpg')
+                        if self.opt.save_depth:
+                            save_path_depth = os.path.join(self.workspace, 'validation', f'{self.name}_{self.epoch:04d}_{self.local_step:04d}_depth.jpg')
                     else:
                         save_path = os.path.join(self.workspace, 'validation', f'{self.name}_{self.local_step:04d}.jpg')
-                        save_path_depth = os.path.join(self.workspace, 'validation', f'{self.name}_{self.local_step:04d}_depth.jpg')
-                    #save_path_gt = os.path.join(self.workspace, 'validation', f'{self.name}_{self.epoch:04d}_{self.local_step:04d}_gt.png')
+                        if self.opt.save_depth:
+                            save_path_depth = os.path.join(self.workspace, 'validation', f'{self.name}_{self.local_step:04d}_depth.jpg')
+                        #save_path_gt = os.path.join(self.workspace, 'validation', f'{self.name}_{self.epoch:04d}_{self.local_step:04d}_gt.png')
 
                     #self.log(f"==> Saving validation image to {save_path}")
                     os.makedirs(os.path.dirname(save_path), exist_ok=True)
                     pred_rgb = (preds[0].detach().cpu().numpy().transpose(1, 2, 0) * 255).astype(np.uint8)
                     pred_bgr = cv2.cvtColor(pred_rgb, cv2.COLOR_RGB2BGR)
                     cv2.imwrite(save_path, pred_bgr)
-                    pred_depth_rgb =  (preds_depth[0].detach().cpu().numpy()[0] * 255).astype(np.uint8)
-                    cv2.imwrite(save_path_depth, pred_depth_rgb)
+                    if self.opt.save_depth:
+                        pred_depth_rgb =  (preds_depth[0].detach().cpu().numpy()[0] * 255).astype(np.uint8)
+                        cv2.imwrite(save_path_depth, pred_depth_rgb)
 
                     pbar.set_description(f"loss={loss_val:.4f} ({total_loss/self.local_step:.4f})")
                     pbar.update(loader.batch_size)
 
             if self.opt.colab:
                 save_path = os.path.join(self.workspace, 'validation')
-                test_image_display = self.sort_latest_img(save_path)
+                test_image_display = self.sort_images(save_path)
                 ipyplot.plot_images(test_image_display, max_images=12, img_width=300,force_b64=True,show_url=False)
 
         average_loss = total_loss / self.local_step

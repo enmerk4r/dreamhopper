@@ -12,6 +12,7 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser()
     parser.add_argument('--text', default=None, help="text prompt")
     parser.add_argument('--image', default=None, help="ref image prompt")
+    parser.add_argument('--image_direction', default=None, help="the view direction if the image prompt: 'front', 'left side', 'back', 'right side', 'top', 'bottom'")
     parser.add_argument('--workspace', type=str, default='workspace')
     parser.add_argument('--output_dir', type=str, default='./output')
     parser.add_argument('--seed', type=int, default=-1,help="set to -1 to get random seed")
@@ -19,6 +20,8 @@ if __name__ == '__main__':
     parser.add_argument('--colab', action='store_true', help="running in colab notebook mode")
     parser.add_argument('--val_int', type=int, default=20, help="interval of saving and displaying intermediate output")
     parser.add_argument('--save_interval_img', action='store_true', help="if save interval images")
+    parser.add_argument('--val_samples', type=int, default=10, help="how many samples to use for validation in training")
+    parser.add_argument('--save_depth', action='store_true', help="if save interval images")
     ### training options
     parser.add_argument('--iters', type=int, default=30000, help="training iters, the final epoch wil be divied by 100")
     parser.add_argument('--lr', type=float, default=5e-4, help="initial learning rate")
@@ -36,12 +39,14 @@ if __name__ == '__main__':
     parser.add_argument('--test', action='store_true', help="test mode")
     parser.add_argument('--save_video', action='store_true', help="save video in testing")
     parser.add_argument('--save_mesh', action='store_true', help="save video in testing")
-    parser.add_argument('--test_samples', type=int, default=10, help="set the total frames of video output")
+    parser.add_argument('--save_density_map', action='store_true', help="save density map in testing and valiation")
+    parser.add_argument('--test_samples', type=int, default=12, help="set the total frames of video output")
     parser.add_argument('--mesh_res', type=int, default=256, help="the resolution of mesh grid")
     parser.add_argument('--mesh_trh', type=int, default=10, help="the threshold of marching cube")
     ## network backbone options
     parser.add_argument('--fp16', action='store_true', help="use amp mixed precision training")
-    parser.add_argument('--cc', action='store_true', help="use TensoRF")
+    #TensoRF curently not available
+    # parser.add_argument('--cc', action='store_true', help="use TensoRF")
     ### dataset options
     parser.add_argument('--bound', type=float, default=1, help="assume the scene is bounded in box(-bound, bound)")
     parser.add_argument('--dt_gamma', type=float, default=0, help="dt_gamma (>=0) for adaptive ray marching. set to 0 to disable, >0 to accelerate rendering (but usually with worse quality)")
@@ -66,10 +71,10 @@ if __name__ == '__main__':
     assert not (opt.text is None and opt.image is None)
     
 
-    if opt.cc:
-        from nerf.network_cc import NeRFNetwork
-    else:
-        from nerf.network import NeRFNetwork
+    # if opt.cc:
+    #     from nerf.network_cc import NeRFNetwork
+    # else:
+    from nerf.network import NeRFNetwork
 
     print(opt)
     if opt.seed == -1:
@@ -119,7 +124,7 @@ if __name__ == '__main__':
             gui.render()
         
         else:
-            valid_loader = NeRFDataset(opt, device=device, type='val', H=opt.H, W=opt.W, radius=opt.radius, fovy=opt.fovy, size=10).dataloader()
+            valid_loader = NeRFDataset(opt, device=device, type='val', H=opt.H, W=opt.W, radius=opt.radius, fovy=opt.fovy, size=opt.val_samples).dataloader()
             max_epoch = np.ceil(opt.iters / len(train_loader)).astype(np.int32)
             trainer.train(train_loader, valid_loader, max_epoch)
 
