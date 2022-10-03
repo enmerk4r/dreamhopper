@@ -286,7 +286,7 @@ class Trainer(object):
         # image augmentation https://pytorch.org/vision/main/transforms.html
         if self.opt.clip_aug:
             self.aug = T.Compose([
-            T.RandomResizedCrop(crop_size,scale=(0.6, 1.0)),
+            T.RandomResizedCrop(crop_size,scale=(0.7, 1.0)),
             # T.GaussianBlur(kernel_size=(1, 3), sigma=(0.1, 1)),
             T.ColorJitter(brightness=(0.2),contrast=(0.2),saturation=(0.2)),
             # T.ColorJitter(brightness=(0.2),contrast=(0.2),saturation=(0.2),hue=(0.25)),
@@ -731,14 +731,12 @@ class Trainer(object):
 
                 pred = preds[0].detach().cpu().numpy()
                 pred = (pred * 255).astype(np.uint8)
-
-                pred_depth = preds_depth[0].detach().cpu().numpy()[0]
-                pred_depth = (pred_depth * 255).astype(np.uint8)
-
                 all_preds.append(pred)
-                all_preds_depth.append(pred_depth)
                 cv2.imwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_{i:04d}_rgb.jpg'), cv2.cvtColor(pred, cv2.COLOR_RGB2BGR))
                 if self.opt.save_depth:
+                    pred_depth = preds_depth[0].detach().cpu().numpy()[0]
+                    pred_depth = (pred_depth * 255).astype(np.uint8)
+                    all_preds_depth.append(pred_depth)
                     cv2.imwrite(os.path.join(save_path,f'{self.name}_{self.epoch}_{i:04d}_depth.jpg'), pred_depth)
                 pbar.update(loader.batch_size)
 
@@ -746,10 +744,11 @@ class Trainer(object):
             save_path_video = os.path.join(self.workspace, 'videos')
             os.makedirs(save_path_video, exist_ok=True)
             all_preds = np.stack(all_preds, axis=0)
-            all_preds_depth = np.stack(all_preds_depth, axis=0)
-            imageio.mimwrite(os.path.join(save_path_video,f'{self.name}_{self.epoch}_depth.mp4'), all_preds_depth, fps=20, quality=8, macro_block_size=1)
             imageio.mimwrite(os.path.join(save_path_video,f'{self.name}_{self.epoch}_rgb.mp4'), all_preds, fps=20, quality=8, macro_block_size=1)
-
+            if self.opt.save_depth:
+                all_preds_depth = np.stack(all_preds_depth, axis=0)
+                imageio.mimwrite(os.path.join(save_path_video,f'{self.name}_{self.epoch}_depth.mp4'), all_preds_depth, fps=20, quality=8, macro_block_size=1)
+        
         print(f"display images in   {self.current_dir}/{save_path}")
 
         if self.opt.colab:
