@@ -1,5 +1,5 @@
 # Dreamhopper
-This project is a fork of [dreamfields-3D](https://github.com/shengyu-meng/dreamfields-3D). It was developed during the 2022 AEC Tech hackathon, which was hosted by CORE studio at Thornton Tomasetti.
+This project is a fork of [dreamfields-3D](https://github.com/shengyu-meng/dreamfields-3D). It was developed during the 2022 AEC Tech hackathon hosted by CORE studio at Thornton Tomasetti.
 
 Dreamhopper turns an implementation of a [dreamfields](https://github.com/google-research/google-research/tree/master/dreamfields) diffusion model into a web-based API that can be easily incorporated into a Rhino + Grasshopper workflow. We wrapped the [dreamfields-3D](https://github.com/shengyu-meng/dreamfields-3D) model in a Flask server connected to a Redis cache, which means that now you will be able to easily generate prompt-based 3D meshes from your favorite design software.
 
@@ -52,6 +52,8 @@ pip install . # install to python path (you still need the raymarching/ folder, 
 
 Currently, `--ff` only supports GPUs with CUDA architecture `>= 70`.
 For GPUs with lower architecture, `--tcnn` can still be used, but the speed will be slower compared to more recent GPUs.
+
+![](https://github.com/enmerk4r/dreamhopper/blob/main/assets/dreamhopper-200.gif)
 
 # Usage
 
