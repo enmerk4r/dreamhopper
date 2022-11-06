@@ -1,7 +1,7 @@
 # Dreamhopper
 This project is a fork of [dreamfields-3D](https://github.com/shengyu-meng/dreamfields-3D). It was developed during the 2022 AEC Tech hackathon, which was hosted by CORE studio at Thornton Tomasetti.
 
-Dreamhopper turns an implementation of a [dreamfields](https://github.com/google-research/google-research/tree/master/dreamfields) diffusion model into a web-based service that can be easily incorporated into a Rhino + Grasshopper workflow. We wrapped the [dreamfields-3D](https://github.com/shengyu-meng/dreamfields-3D) model in a Flask server connected to a Redis cache, which means that now you will be able to easily generate prompt-based 3D meshes from your favorite design software.
+Dreamhopper turns an implementation of a [dreamfields](https://github.com/google-research/google-research/tree/master/dreamfields) diffusion model into a web-based API that can be easily incorporated into a Rhino + Grasshopper workflow. We wrapped the [dreamfields-3D](https://github.com/shengyu-meng/dreamfields-3D) model in a Flask server connected to a Redis cache, which means that now you will be able to easily generate prompt-based 3D meshes from your favorite design software.
 
 ![](https://github.com/enmerk4r/dreamhopper/blob/main/assets/dreamhopper-150.gif)
 
@@ -55,21 +55,37 @@ For GPUs with lower architecture, `--tcnn` can still be used, but the speed will
 
 # Usage
 
-First run will take some time to compile the CUDA extensions.
+Since inference takes considerable time even on powerful GPUs, this API uses a "ticketing" system. First, a `POST` request is sent to the `/generate` endpoint that starts mesh generation on a separate thread and returns the id of the submitted job. This id can be used by the client to periodically check whether the mesh has been generated. The overall flow looks something like this:
+### 1. POST to /generate
+```
+Request:
+[POST] /generate
+{
+  "text": "airplane",
+  "iters": 15000.0,
+  "seed": -1.0,
+  "w": 224,
+  "h": 224,
+  "W": 384,
+  "H": 384
+}
 
-```bash
-# text-guided generation
-python main_nerf.py --text "cthulhu" --workspace trial --cuda_ray --fp16
-
-# use the GUI
-python main_nerf.py --text "cthulhu" --workspace trial --cuda_ray --fp16 --gui
-
-# [experimental] image-guided generation (also uses the CLIP loss)
-python main_nerf.py --image /path/to/image --workspace trial --cuda_ray --fp16
-
+Response:
+{
+  "id": "9a7c7512-8de0-4eaf-ab95-cebf78a27083"
+}
 ```
 
-check the `scripts` directory for more examples.
+### 2. Periodically check job status
+You can then use the id to periodically check the status of your request:
+```
+Request:
+[POST] /check
+{
+  "id": "9a7c7512-8de0-4eaf-ab95-cebf78a27083"
+}
+```
+The response object from the '/check' route contains tons of parameters, but the two important ones are `done` and `mesh`. The former is a boolean that indicates whether mesh generation is complete, and once it is, the latter will be populated with output mesh geometry
 
 # Acknowledgement
 
