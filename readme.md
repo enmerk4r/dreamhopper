@@ -14,7 +14,7 @@ Dreamhopper turns an implementation of a [dreamfields](https://github.com/google
 - Nathaniel Steinrueck
 - Pedro Cortes
 - Jefferey Moser
-- Juan Areendondo
+- Juan Arredondo
 
 # Installation instructions
 
