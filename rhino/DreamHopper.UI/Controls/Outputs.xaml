@@ -1,0 +1,50 @@
+﻿<UserControl x:Class="DreamHopper.UI.Controls.Outputs"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:DreamHopper.UI.Controls"
+             xmlns:viewmodel="clr-namespace:DreamHopper.ViewModels.ViewModels;assembly=DreamHopper.ViewModels"
+             xmlns:materialDesign="http://materialdesigninxaml.net/winfx/xaml/themes"
+             mc:Ignorable="d" 
+             d:DesignHeight="150" d:DesignWidth="250">
+    <Control.Resources>
+        <ResourceDictionary Source="pack://application:,,,/DreamHopper.UI;component/ResourceDictionary.xaml"/>
+    </Control.Resources>
+    <Grid Margin="10">
+        <!--<ProgressBar Style="{StaticResource MaterialDesignCircularProgressBar}" 
+                     IsIndeterminate="True" Foreground="{StaticResource PrimaryHueMidBrush}" 
+                     Visibility="{Binding Processing, Converter={local:BooleanToVisiblityConverter}}"
+                     VerticalAlignment="Center"
+                     HorizontalAlignment="Center"
+                     Margin="20"/>
+
+        <StackPanel Visibility="{Binding Processing, Converter={local:InverseBooleanToVisiblityConverter}}">
+            <ItemsControl ItemsSource="{Binding Outputs}">
+                <ItemsControl.Resources>
+                    <DataTemplate DataType="{x:Type viewmodel:OutputCardViewModel}">
+                        <local:OutputCard/>
+                    </DataTemplate>
+                </ItemsControl.Resources>
+            </ItemsControl>
+            <Button 
+                Margin="0,10" 
+                Padding="0"
+                Command="{Binding SaveImagesCommand}" 
+                Foreground="{StaticResource PrimaryHueLightBrush}"
+                Background="{StaticResource PrimaryHueDarkBrush}"
+                BorderBrush="{StaticResource PrimaryHueDarkBrush}">
+                <StackPanel Orientation="Horizontal">
+                    <materialDesign:PackIcon 
+                            Height="20" 
+                            Width="20" 
+                            Kind="Floppy" 
+                            Foreground="{StaticResource PrimaryHueLightForegroundBrush}"
+                            VerticalAlignment="Center"
+                            Margin="0,0,10,0"/>
+                    <Label Content="Save" FontSize="12" VerticalAlignment="Center" Foreground="{StaticResource PrimaryHueLightForegroundBrush}"/>
+                </StackPanel>
+            </Button>
+        </StackPanel>-->
+    </Grid>
+</UserControl>

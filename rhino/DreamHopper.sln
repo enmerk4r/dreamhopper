@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.3.32825.248
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "DreamHopper", "DreamHopper\DreamHopper.csproj", "{0E4757D8-3921-49B8-8217-13014336A9CA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamHopper.MVVM", "DreamHopper.MVVM\DreamHopper.MVVM.csproj", "{8C42B10A-2ED7-41C3-8456-B2894E70276C}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamHopper.UI", "DreamHopper.UI\DreamHopper.UI.csproj", "{08483750-2F78-482A-97EC-84D00C5ED87D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamHopper.ViewModels", "DreamHopper.ViewModels\DreamHopper.ViewModels.csproj", "{EFD44BAD-8996-4835-A168-34BAAA5834AA}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamHopper.WebClient", "DreamHopper.WebClient\DreamHopper.WebClient.csproj", "{AD075BE5-1CF1-4584-A24D-9E0C80A00854}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DreamHopper.IO", "DreamHopper.IO\DreamHopper.IO.csproj", "{9A7841EB-87D7-44C3-9547-2147EE890A7A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{0E4757D8-3921-49B8-8217-13014336A9CA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E4757D8-3921-49B8-8217-13014336A9CA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E4757D8-3921-49B8-8217-13014336A9CA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E4757D8-3921-49B8-8217-13014336A9CA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8C42B10A-2ED7-41C3-8456-B2894E70276C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8C42B10A-2ED7-41C3-8456-B2894E70276C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8C42B10A-2ED7-41C3-8456-B2894E70276C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8C42B10A-2ED7-41C3-8456-B2894E70276C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{08483750-2F78-482A-97EC-84D00C5ED87D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{08483750-2F78-482A-97EC-84D00C5ED87D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{08483750-2F78-482A-97EC-84D00C5ED87D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{08483750-2F78-482A-97EC-84D00C5ED87D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EFD44BAD-8996-4835-A168-34BAAA5834AA}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EFD44BAD-8996-4835-A168-34BAAA5834AA}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EFD44BAD-8996-4835-A168-34BAAA5834AA}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EFD44BAD-8996-4835-A168-34BAAA5834AA}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AD075BE5-1CF1-4584-A24D-9E0C80A00854}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AD075BE5-1CF1-4584-A24D-9E0C80A00854}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AD075BE5-1CF1-4584-A24D-9E0C80A00854}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AD075BE5-1CF1-4584-A24D-9E0C80A00854}.Release|Any CPU.Build.0 = Release|Any CPU
+		{9A7841EB-87D7-44C3-9547-2147EE890A7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{9A7841EB-87D7-44C3-9547-2147EE890A7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{9A7841EB-87D7-44C3-9547-2147EE890A7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{9A7841EB-87D7-44C3-9547-2147EE890A7A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7C7A7A2E-214B-4546-A81D-346B9517C7D6}
+	EndGlobalSection
+EndGlobal
