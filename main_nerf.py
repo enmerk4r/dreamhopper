@@ -81,6 +81,8 @@ if __name__ == '__main__':
         opt.seed = random.sample(range(0,np.iinfo(np.int32).max),1)[0]
     seed_everything(opt.seed)
 
+    print("opt.bound", opt.bound)
+
     model = NeRFNetwork(
         bound=opt.bound,
         cuda_ray=opt.cuda_ray,
