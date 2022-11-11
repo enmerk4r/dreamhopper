@@ -36,6 +36,8 @@ The architecture of this app is pretty simple. It has three main components:
 +---------------------+
 ```
 
+![](https://github.com/enmerk4r/dreamhopper/blob/main/assets/dreamhopper-200.gif)
+
 # Server Setup Instructions
 The code framework is based on [torch-ngp](https://github.com/ashawkey/torch-ngp).
 
@@ -99,7 +101,6 @@ python server.py
 Currently, `--ff` only supports GPUs with CUDA architecture `>= 70`.
 For GPUs with lower architecture, `--tcnn` can still be used, but the speed will be slower compared to more recent GPUs.
 
-![](https://github.com/enmerk4r/dreamhopper/blob/main/assets/dreamhopper-200.gif)
 
 # Usage
 
