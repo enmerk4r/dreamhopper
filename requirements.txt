@@ -21,4 +21,6 @@ imageio-ffmpeg
 pymeshlab
 ipyplot
 IPython
+Flask
+redis
 git+https://github.com/openai/CLIP.git
