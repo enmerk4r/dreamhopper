@@ -80,7 +80,7 @@ sudo apt-get -y install redis
 redis-server
 ```
 
-### 7. Configure Flask server
+### 7. Configure the Flask server
 In order to connect your Redis cache to the Flask server, please edit the [config.json](https://github.com/enmerk4r/dreamhopper/blob/main/config.json) file so that it reflects the HTTP port used by the Redis server. By default it is 6379
 ```json
 {
