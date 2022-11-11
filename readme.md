@@ -16,25 +16,45 @@ Dreamhopper turns an implementation of a [dreamfields](https://github.com/google
 - Jefferey Moser
 - Juan Arredondo
 
-# Installation instructions
-
-The code framework is based on [torch-ngp](https://github.com/ashawkey/torch-ngp).
-
-```bash
-git clone https://github.com/shengyu-meng/dreamfields-3D.git
-cd dreamfields-3D
+# Architecture
+The architecture of this app is pretty simple. It has three main components:
+- A Flask webserver that serves the NeRF model
+- A REDIS cache that allows Flask to keep track of the jobs that are queued and the jobs that are complete
+- A Rhino plugin that lets you pass prompts to the server and displays the results
+```
++---------------------+
+|     Flask Server    |
++---------------------+
+| +---------------- + |            +--------------+
+| |    NeRF model   | |------------| Rhino Plugin |
+| +-----------------+ |            +--------------+
++---------------------+         
+           |                    
+           |                    
++---------------------+
+|      Redis Cache    |
++---------------------+
 ```
 
-### Install with pip
+# Server Setup Instructions
+The code framework is based on [torch-ngp](https://github.com/ashawkey/torch-ngp).
+
+### 1. Clone the repo
+```bash
+git clone https://github.com/enmerk4r/dreamhopper.git
+cd dreamhopper
+```
+
+### 2. Install Python dependencies
 ```bash
 pip install -r requirements.txt
 ```
-###  install a custom verion of pymarchingcubes
+### 3. Install a custom verion of pymarchingcubes
 ```bash
 bash scripts/install_PyMarchingCubes.sh
 ```
 
-### Build extensions
+### 4. Build extensions
 ```bash
 # install all extension modules
 bash scripts/install_ext.sh
@@ -42,6 +62,32 @@ bash scripts/install_ext.sh
 cd raymarching
 python setup.py build_ext --inplace # build ext only, do not install (only can be used in the parent directory)
 pip install . # install to python path (you still need the raymarching/ folder, since this only install the built extension.)
+```
+
+### 5. Install Redis
+```bash
+sudo apt install lsb-release
+curl -fsSL https://packages.redis.io/gpg | sudo gpg --dearmor -o /usr/share/keyrings/redis-archive-keyring.gpg
+echo "deb [signed-by=/usr/share/keyrings/redis-archive-keyring.gpg] https://packages.redis.io/deb $(lsb_release -cs) main" | sudo tee /etc/apt/sources.list.d/redis.list
+sudo apt-get update
+sudo apt-get -y install redis
+```
+
+### 6. Start the Redis server
+```bash
+redis-server
+```
+
+### 7. Configure Flask server
+In order to connect your Redis cache to the Flask server, please edit the [config.json](https://github.com/enmerk4r/dreamhopper/blob/main/config.json) file so that it reflects the HTTP port used by the Redis server. By default it is 6379
+```json
+{
+    "redis": 6379
+}
+```
+### 8. Start the Flask server
+```bash
+python server.py
 ```
 
 ### Tested environments
